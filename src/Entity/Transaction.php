@@ -9,6 +9,7 @@ use BcMath\Number;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\SerializedName;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
 #[ORM\Table(name: '`transaction`')]
@@ -25,6 +26,7 @@ class Transaction
 
     #[ORM\Column(type: Types::NUMBER, precision: 10, scale: 2)]
     #[SerializedName("Amount")]
+    #[Assert\Positive]
     private ?Number $amount = null;
     #[ORM\Column(enumType: TransactionType::class)]
 

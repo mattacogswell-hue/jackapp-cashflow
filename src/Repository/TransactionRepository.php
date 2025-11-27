@@ -6,7 +6,8 @@ use App\Entity\Transaction;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Enum\TransactionType;
-use DateTime;
+use App\Enum\TransactionRecurringType;
+use DateTimeImmutable;
 
 /**
  * @extends ServiceEntityRepository<Transaction>
@@ -19,12 +20,16 @@ class TransactionRepository extends ServiceEntityRepository
     }
 
     /**
-     * Finds all transactions ordered by date ascending.
+     * Finds all past transactions ordered by date ascending.
      * @return Transaction[]
      */
-    public function findAllOrderedByDateAsc(): array
+    public function findPastTransactions(): array
     {
-        return $this->createQueryBuilder('t') 
+        $now = new DateTimeImmutable();
+
+        return $this->createQueryBuilder('t')
+            ->where('t.date < :now') 
+            ->setParameter('now', $now)
             ->orderBy('t.date', 'ASC') 
             ->getQuery()
             ->getResult();
@@ -63,18 +68,13 @@ class TransactionRepository extends ServiceEntityRepository
     }
 
     /**
-     * Finds all upcoming expense transactions ordered by date ascending.
-     * @return Transaction[]
+     * Finds all recurring transactions
      */
-    public function findAllUpcomingExpenses(): array
+    public function findAllRecurringTransactions(): array
     {
-        $now = new DateTime();
-
         return $this->createQueryBuilder('t') 
-            ->where('t.date > :now')
-            ->andWhere('t.type = :type')
-            ->setParameter('type', TransactionType::Expense)
-            ->setParameter('now', $now)
+            ->where('t.RecurringType != :noRepeat')
+            ->setParameter('noRepeat', TransactionRecurringType::NoRepeat->value)
             ->orderBy('t.date', 'ASC') 
             ->getQuery()
             ->getResult();

@@ -19,15 +19,15 @@ class AppFixtures extends Fixture
             ->setAmount(new Number(100.00))
             ->setType(TransactionType::Income)
             ->setRecurringType(TransactionRecurringType::NoRepeat)
-            ->setDate(new DateTime("2025-11-27"));
+            ->setDate(new DateTime("2025-11-29"));
         $manager->persist($transaction);
 
         $transaction = new Transaction();
         $transaction
-            ->setAmount(new Number(150.00))
+            ->setAmount(new Number(50.00))
             ->setType(TransactionType::Income)
-            ->setRecurringType(TransactionRecurringType::NoRepeat)
-            ->setDate(new DateTime("2025-11-29"));
+            ->setRecurringType(TransactionRecurringType::Weekly)
+            ->setDate(new DateTime("2025-11-30"));
         $manager->persist($transaction);
 
         $transaction = new Transaction();
@@ -40,7 +40,7 @@ class AppFixtures extends Fixture
 
         $transaction = new Transaction();
         $transaction
-            ->setAmount(new Number(50.00))
+            ->setAmount(new Number(200.00))
             ->setType(TransactionType::Expense)
             ->setRecurringType(TransactionRecurringType::NoRepeat)
             ->setDate(new DateTime("2025-12-03"));
