@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use DateTimeImmutable;
+use DateTime;
 use App\Enum\TransactionRecurringType;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Helper\ForecastHelper;
@@ -207,16 +208,23 @@ final class CashflowController extends AbstractController
     #[Route('/balance', name: 'balance', methods: ["GET"])]
     public function balance(EntityManagerInterface $em): JsonResponse
     {
+        $today = new DateTime();
         $transactions = $em->getRepository(Transaction::class)->findPastTransactions();
 
         $balance = 0;
         foreach($transactions as $transaction) {
+            $multipler = ForecastHelper::getTransactionMultiplerBetweenDates(
+                $transaction->getRecurringType(),
+                $transaction->getdate(),
+                $today
+            );
+
             switch ($transaction->getType()) {
                 case TransactionType::Income:
-                    $balance += $transaction->getAmount();
+                    $balance += ($multipler * $transaction->getAmount());
                     break;
                 case TransactionType::Expense:
-                    $balance -= $transaction->getAmount();
+                    $balance -= ($multipler * $transaction->getAmount());
                     break;
                 default:
                     break;
@@ -224,7 +232,9 @@ final class CashflowController extends AbstractController
         }
 
         return $this->json([
-            'Current Balance' => $balance->round(2),
+            'Current Balance' => $balance instanceof \BcMath\Number
+                ? $balance->round(2)
+                : round($balance, 2),
         ]);
     }
 }
